@@ -3,6 +3,8 @@ Jon Brisbin <jbrisbin@basho.com>
 
 This asciibuild footnote:[https://github.com/jbrisbin/asciibuild] file can be used to build a wide variety of variations of Docker containers for running a Riak cluster. It runs a single node per container instance and by setting the `CLUSTER_COORDINATOR` environment variable to the IP address of a "master" node (the primary or seed node of a cluster), subsequent containers can be automatically joined into a cluster.
 
+image:https://travis-ci.org/jbrisbin/riak-docker.svg[link="https://travis-ci.org/jbrisbin/riak-docker"]
+
 include::vars.adoc[]
 
 .Variables to Set that influence the build
