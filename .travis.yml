@@ -8,7 +8,7 @@ before_script:
   - gem install asciibuild
 
 script:
-  - asciibuild -a docker_user=$DOCKER_USER -a docker_password=$DOCKER_PASSWORD $ASCIIBUILD_OPTS -r $DOCKER_USER -r $DOCKER_PASSWORD README.adoc
+  - asciibuild $ASCIIBUILD_OPTS README.adoc
 
 env:
   matrix:
