@@ -1,0 +1,66 @@
+:riak_flavor: kv
+ifeval::["{riak_flavor}" == "kv"]
+:!riak_ts:
+:riak_pkg: riak
+endif::[]
+ifeval::["{riak_flavor}" == "ts"]
+:riak_ts:
+:riak_pkg: riak-ts
+endif::[]
+:riak_version: 2.1.4
+:riak_tag: riak-{riak_flavor}:{riak_version}
+:riak_explorer:
+:riak_explorer_version: 1.2.2
+:python_version: 2.7
+:python_lib_dir: /usr/lib/python{python_version}/dist-packages
+:riak_client:
+:riak_client_version: 2.4.2
+:protobuf_version: 2.6.1
+:os_family: ubuntu
+:os_version: 14.04
+ifeval::["{os_family}" == "ubuntu"]
+:ubuntu:
+:!debian:
+:!centos:
+:!osx:
+:pkg_format: deb
+ifeval::["{os_version}" == "14.04"]
+:trusty:
+:os_flavor: trusty
+endif::[]
+endif::[]
+ifeval::["{os_family}" == "debian"]
+:!ubuntu:
+:debian:
+:!centos:
+:!osx:
+:pkg_format: deb
+ifeval::["{os_version}" == "8"]
+:jessie:
+:os_flavor: jessie
+endif::[]
+endif::[]
+ifeval::["{os_family}" == "centos"]
+:!ubuntu:
+:!debian:
+:centos:
+:!osx:
+:pkg_format: rpm
+:python_lib_dir: /usr/lib/python{python_version}/site-packages
+endif::[]
+ifeval::["{os_family}" == "osx"]
+:!ubuntu:
+:!debian:
+:!centos:
+:osx:
+:pkg_format: tgz
+ifeval::["{os_version}" == "10.11"]
+:el_capitan:
+:os_flavor: el_capitan
+endif::[]
+endif::[]
+:openjdk:
+:docker:
+ifeval::["{pkg_format}" == "tgz"]
+:riak_tgz_baseurl: https://basholabs.artifactoryonline.com/basholabs/build
+endif::[]

@@ -1,0 +1,171 @@
+= Riak in Docker
+Jon Brisbin <jbrisbin@basho.com>
+
+This asciibuild footnote:[https://github.com/jbrisbin/asciibuild] file can be used to build a wide variety of variations of Docker containers for running a Riak cluster. It runs a single node per container instance and by setting the `CLUSTER_COORDINATOR` environment variable to the IP address of a "master" node (the primary or seed node of a cluster), subsequent containers can be automatically joined into a cluster.
+
+include::vars.adoc[]
+
+.Variables to Set that influence the build
+* `riak_version`: {riak_version}
+* `riak_flavor`: {riak_flavor}
+* `riak_tag`: {riak_tag}
+* `riak_explorer_version`: {riak_explorer_version}
+
+.Variables for turning on or off components
+* `openjdk`: _set or unset_
+* `docker`: _set or unset_
+* `riak_explorer`: _set or unset_
+
+== Before All
+
+.Riak Docker
+[source,Dockerfile]
+[asciibuild,Dockerfile,image="{riak_tag}",run=true,run_opts="--name {riak_pkg} -p 8087:8087 -p 8098:8098"]
+----
+FROM {{os_family}}:{{os_version}}
+
+ENV OS_FAMILY {{os_family}}
+ENV OS_VERSION {{os_version}}
+ifdef::os_flavor[]
+ENV OS_FLAVOR {{os_flavor}}
+endif::[]
+
+ifdef::ubuntu,debian[]
+ENV DEBIAN_FRONTEND noninteractive
+ENV DEBCONF_NONINTERACTIVE_SEEN true
+
+# Install essential software
+RUN apt-get update
+RUN apt-get dist-upgrade -y
+RUN apt-get install -y apt-transport-https
+RUN apt-get install -y python python-six python-pkg-resources
+RUN apt-get install -y curl
+RUN apt-get install -y libapr1 realpath jq unzip
+RUN apt-get install -y iproute iputils-ping
+
+ifdef::openjdk[]
+# Install OpenJDK 8
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys DA1A4A13543B466853BAF164EB9B1D8886F44E2A
+ifdef::ubuntu[]
+RUN echo "deb http://ppa.launchpad.net/openjdk-r/ppa/ubuntu {{os_flavor}} main" >/etc/apt/sources.list.d/openjdk.list
+RUN echo "deb-src http://ppa.launchpad.net/openjdk-r/ppa/ubuntu {{os_flavor}} main" >>/etc/apt/sources.list.d/openjdk.list
+endif::ubuntu[]
+ifdef::debian+jessie[]
+RUN echo "deb http://http.debian.net/debian jessie-backports main" >/etc/apt/sources.list.d/openjdk.list
+endif::debian+jessie[]
+RUN apt-get update
+RUN apt-get install -y openjdk-8-jdk-headless
+endif::openjdk[]
+endif::ubuntu,debian[]
+
+ifdef::centos[]
+RUN yum install -y epel-release
+RUN yum -q -y install openssl curl python python-six python-setuptools ca-certificates jq which unzip
+endif::centos[]
+
+ENV RIAK_VERSION {{riak_version}}
+ifndef::riak_ts[]
+ENV RIAK_FLAVOR KV
+endif::[]
+ifdef::riak_ts[]
+ENV RIAK_FLAVOR TS
+endif::[]
+
+ifdef::ubuntu,debian[]
+ENV RIAK_HOME /usr/lib/riak
+endif::[]
+ifdef::centos[]
+ENV RIAK_HOME /usr/lib64/riak
+endif::[]
+
+ifeval::["{pkg_format}" == "tgz"]
+RUN \
+  mkdir -p $RIAK_HOME && \
+  curl -sL {{riak_tgz_baseurl}}/{{os_family}}-{{os_version}}/{{riak_pkg}}-oss/{{riak_pkg}}-{{riak_version}}/{{riak_pkg}}-{{riak_version}}-bin.tgz | tar -zxf - -C $RIAK_HOME
+COPY rel_to_pkg.sh /tmp
+RUN chmod a+x /tmp/rel_to_pkg.sh && /tmp/rel_to_pkg.sh
+ENV PATH $RIAK_HOME/bin:$PATH
+endif::[]
+ifeval::["{pkg_format}" != "tgz"]
+RUN curl -s https://packagecloud.io/install/repositories/basho/{{riak_pkg}}/script.{{pkg_format}}.sh | bash
+ifdef::ubuntu,debian[]
+RUN apt-get install -y {{riak_pkg}}={{riak_version}}-1
+endif::[]
+ifdef::centos[]
+RUN yum install -y {{riak_pkg}}-{{riak_version}}
+endif::[]
+endif::[]
+
+ifdef::riak_explorer[]
+# Install Riak Explorer
+RUN curl -sSL https://github.com/basho-labs/riak_explorer/releases/download/{{riak_explorer_version}}/riak_explorer-{{riak_explorer_version}}.patch-{{os_family}}-{{os_version}}.tar.gz | tar -zxf - -C $RIAK_HOME --strip-components 2
+endif::riak_explorer[]
+
+ifdef::riak_client[]
+# Install the Python client
+RUN \
+  cd {{python_lib_dir}} && \
+  curl -sSLO https://pypi.python.org/packages/{{python_version}}/r/riak/riak-{{riak_client_version}}-py{{python_version}}.egg && \
+  curl -sSLO https://pypi.python.org/packages/{{python_version}}/p/protobuf/protobuf-{{protobuf_version}}-py{{python_version}}.egg && \
+  unzip -o riak-{{riak_client_version}}-py{{python_version}}.egg && \
+  unzip -o protobuf-{{protobuf_version}}-py{{python_version}}.egg
+endif::riak_client[]
+
+# Expose default ports
+EXPOSE 8087
+EXPOSE 8098
+
+# Expose volumes for data and logs
+VOLUME /var/log/riak
+VOLUME /var/lib/riak
+
+# Install custom start script
+COPY riak-cluster.sh $RIAK_HOME/riak-cluster.sh
+RUN chmod a+x $RIAK_HOME/riak-cluster.sh
+# Install custom hooks
+COPY prestart.d /etc/riak/prestart.d
+COPY poststart.d /etc/riak/poststart.d
+
+# Prepare for bootstrapping schemas
+RUN mkdir -p /etc/riak/schemas
+
+WORKDIR /var/lib/riak
+
+CMD $RIAK_HOME/riak-cluster.sh
+
+# Clean up APT cache
+RUN rm -rf /var/lib/apt/lists/* /tmp/*
+----
+
+== Test Single Node
+
+Validate the container is started by waiting for it to fully boot, then accessing the `/stats` endpoint.
+
+.Wait for riak_kv to start
+[source,bash]
+[asciibuild,bash,container="Riak Docker"]
+----
+riak-admin wait-for-service riak_kv
+----
+
+.Check node Status
+[source,bash]
+[asciibuild,bash]
+----
+[ "0" == "$(curl -s localhost:8098/stats | jq -r '.vnode_gets')" ]
+curl -s localhost:8098/types/default/buckets/notfound/keys/notfound
+sleep 1
+[ "3" == "$(curl -s localhost:8098/stats | jq -r '.vnode_gets')" ]
+----
+
+== After All
+
+Clean up temporary and transitory files that get rebuilt each time this build is run.
+
+.Cleanup
+[source,bash]
+[asciibuild,bash]
+----
+rm -Rf Dockerfile
+docker rm -f $(docker ps -a -q -f label=asciibuild.name="Riak in Docker")
+----
