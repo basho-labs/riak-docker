@@ -19,7 +19,7 @@ include::vars.adoc[]
 * `riak_explorer`: _set or unset_ Whether or not to include Riak Explorer
 * `riak_client`: _set or unset_ Whether or not to include the Riak Python client
 
-== Before All
+== Create Image
 
 .Riak Docker
 [source,Dockerfile]
@@ -235,7 +235,31 @@ sleep 1
 [ "3" == "$(stats)" ]
 ----
 
-== After All
+== Test Cluster
+
+This Docker image has support for automatically creating a cluster by setting the environment variable `COORDINATOR_NODE` to the IP address of a node to which you want to join when container starts.
+
+.Start additional Cluster Nodes
+[source,bash]
+[asciibuild,bash]
+----
+# {{=<% %>=}}
+# Discover coordinator node IP
+COORDINATOR_NODE=$(docker inspect -f {{.NetworkSettings.IPAddress}} <% riak_pkg %>)
+# Start new nodes for the cluster
+for i in 1 2; do
+  CONTAINER=$(docker run -d --label=asciibuild.name="Riak in Docker" -e COORDINATOR_NODE=$COORDINATOR_NODE <% riak_tag %>)
+  # Wait for node to completely start
+  docker exec $CONTAINER riak-admin wait-for-service riak_kv
+done
+# Wait for cluster to settle some
+sleep 5
+# Verify three nodes report up
+STATUS=$(docker exec <% riak_pkg %> riak-admin cluster status --format csv | tail -n 3 | cut -d, -f3)
+[ "$(echo $STATUS)" == "up up up" ]
+----
+
+== Cleanup
 
 Clean up temporary and transitory files that get rebuilt each time this build is run.
 
@@ -248,5 +272,28 @@ ifndef::skip_clean[]
 ----
 rm -Rf Dockerfile
 docker rm -f $(docker ps -a -q -f label=asciibuild.name="Riak in Docker")
+----
+endif::[]
+
+ifdef::publish[]
+== Publish
+
+Tag and publish the image.
+
+:docker_image_name: riak-{riak_flavor}:{os_family}-{riak_version}
+ifdef::docker_org[]
+:docker_image_tag: {docker_org}/{docker_image_name}
+endif::[]
+ifndef::docker_org[]
+:docker_image_tag: {docker_image_name}
+endif::[]
+
+.Tag Image
+[source,bash]
+[asciibuild,bash]
+----
+docker tag {{riak_tag}} {{docker_image_tag}}
+docker login -u {{docker_user}} -p {{docker_password}}
+docker push {{docker_image_tag}}
 ----
 endif::[]
