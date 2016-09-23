@@ -6,6 +6,7 @@ services:
 
 before_script:
   - gem install asciibuild
+  - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
 
 script:
   - asciibuild $ASCIIBUILD_OPTS README.adoc
