@@ -8,10 +8,9 @@ before_script:
   - gem install asciibuild
 
 script:
-  - asciibuild -a docker_user=$DOCKER_USER -a docker_password=$DOCKER_PASSWORD $ASCIIBUILD_OPTS README.adoc
+  - asciibuild -a docker_user=$DOCKER_USER -a docker_password=$DOCKER_PASSWORD $ASCIIBUILD_OPTS -r $DOCKER_USER -r $DOCKER_PASSWORD README.adoc
 
 env:
   matrix:
     - ASCIIBUILD_OPTS="-a os_family=ubuntu -a os_version=14.04 -a publish"
     - ASCIIBUILD_OPTS="-a os_family=centos -a os_version=7 -a publish"
-  
