@@ -10,13 +10,14 @@ include::vars.adoc[]
 * `riak_flavor`: {riak_flavor}
 * `riak_tag`: {riak_tag}
 * `riak_explorer_version`: {riak_explorer_version}
+* `riak_client_version`: {riak_client_version}
 
 [[switches]]
 .Variables for turning on or off components
 * `openjdk`: _set or unset_ Whether or not to include OpenJDK 8
 * `docker`: _set or unset_ Whether or not to include the Docker command-line tools
-* `riak_explorer`: _set or unset_
-* `riak_client`: _set or unset_
+* `riak_explorer`: _set or unset_ Whether or not to include Riak Explorer
+* `riak_client`: _set or unset_ Whether or not to include the Riak Python client
 
 == Before All
 
@@ -238,6 +239,9 @@ sleep 1
 
 Clean up temporary and transitory files that get rebuilt each time this build is run.
 
+This step can be skipped by setting the attribute `skip_clean` when running the build.
+
+ifndef::skip_clean[]
 .Cleanup
 [source,bash]
 [asciibuild,bash]
@@ -245,3 +249,4 @@ Clean up temporary and transitory files that get rebuilt each time this build is
 rm -Rf Dockerfile
 docker rm -f $(docker ps -a -q -f label=asciibuild.name="Riak in Docker")
 ----
+endif::[]
