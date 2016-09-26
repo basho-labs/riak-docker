@@ -25,7 +25,7 @@ include::vars.adoc[]
 
 .Riak Docker
 [source,Dockerfile]
-[asciibuild,Dockerfile,image="{riak_tag}",run=true,run_opts="--name {riak_pkg} -p 8087:8087 -p 8098:8098 -v /var/run/docker.sock:/var/run/docker.sock"]
+[asciibuild,Dockerfile,image="{riak_tag}",run=true,run_opts="--label role=cluster --name {riak_pkg} -p 8087:8087 -p 8098:8098 -v /var/run/docker.sock:/var/run/docker.sock"]
 ----
 FROM {{os_family}}:{{os_version}}
 
@@ -43,7 +43,7 @@ ENV DEBCONF_NONINTERACTIVE_SEEN true
 RUN apt-get update
 RUN apt-get dist-upgrade -y
 RUN apt-get install -y apt-transport-https
-RUN apt-get install -y python python-six python-pkg-resources
+RUN apt-get install -y python python-six python-pkg-resources python-openssl
 RUN apt-get install -y curl
 RUN apt-get install -y libapr1 realpath jq unzip
 RUN apt-get install -y iproute iputils-ping
@@ -250,7 +250,7 @@ This Docker image has support for automatically creating a cluster by setting th
 COORDINATOR_NODE=$(docker inspect -f {{.NetworkSettings.IPAddress}} <% riak_pkg %>)
 # Start new nodes for the cluster
 for i in 1 2; do
-  CONTAINER=$(docker run -d --label=asciibuild.name="Riak in Docker" -e COORDINATOR_NODE=$COORDINATOR_NODE <% riak_tag %>)
+  CONTAINER=$(docker run -d --label=asciibuild.name="Riak in Docker" --label=role=cluster -e COORDINATOR_NODE=$COORDINATOR_NODE <% riak_tag %>)
   # Wait for node to completely start
   docker exec $CONTAINER riak-admin wait-for-service riak_kv
 done
@@ -260,6 +260,43 @@ sleep 5
 STATUS=$(docker exec <% riak_pkg %> riak-admin cluster status --format csv | tail -n 3 | cut -d, -f3)
 [ "$(echo $STATUS)" == "up up up" ]
 ----
+
+ifdef::riak_client[]
+== Test Riak Client
+
+Test that the Python Riak Client can interact with the cluster.
+
+.Pytest Container
+[source,python]
+[asciibuild,Dockerfile,image=riak-docker-tests,run=true,run_opts="--label role=pytests -i -v $(pwd)/test:/usr/src/test -v /var/run/docker.sock:/var/run/docker.sock"]
+----
+FROM alpine
+RUN apk add --no-cache py-pip bash ca-certificates docker
+RUN pip install --upgrade pip pytest riak
+WORKDIR /usr/src/test
+CMD /bin/cat
+----
+
+.Run Tests
+[source,bash]
+[asciibuild,bash,container="Pytest Container"]
+----
+py.test -v
+----
+
+=== After Test Riak Client
+
+.Cleanup Test Container
+[source,bash]
+[asciibuild,bash]
+----
+rm -Rf Dockerfile
+for f in __pycache__ .cache *.pyc; do
+  rm -Rf $(find test -name $f -print)
+done
+docker rm -f $(docker ps -a -q -f label=role=pytests)
+----
+endif::riak_client[]
 
 == Cleanup
 
@@ -273,7 +310,7 @@ ifndef::skip_clean[]
 [asciibuild,bash]
 ----
 rm -Rf Dockerfile
-docker rm -f $(docker ps -a -q -f label=asciibuild.name="Riak in Docker")
+docker rm -f $(docker ps -aqf label=role=cluster)
 ----
 endif::[]
 
@@ -299,7 +336,7 @@ endif::[]
 docker tag {{riak_tag}} {{docker_image_tag}}
 # Push specific version
 docker push {{docker_image_tag}}
-if [[ "{{os_family}}" == "ubuntu" -a "{{os_version}}" == "14.04" ]]; then
+if [[ "{{os_family}}" == "ubuntu" && "{{os_version}}" == "14.04" ]]; then
   # Push 'latest' tag if Ubuntu Trusty
   docker tag {{riak_tag}} {{docker_latest_tag}}
   docker push {{docker_latest_tag}}
