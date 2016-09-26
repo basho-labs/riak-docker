@@ -239,7 +239,7 @@ sleep 1
 
 == Test Cluster
 
-This Docker image has support for automatically creating a cluster by setting the environment variable `COORDINATOR_NODE` to the IP address of a node to which you want to join when container starts.
+This Docker image has support for automatically creating a cluster by setting the environment variable `COORDINATOR_NODE` to the IP address of a node to which you want to join when the container starts.
 
 .Start additional Cluster Nodes
 [source,bash]
@@ -285,9 +285,11 @@ Tag and publish the image.
 :docker_image_name: riak-{riak_flavor}:{os_family}-{riak_version}
 ifdef::docker_org[]
 :docker_image_tag: {docker_org}/{docker_image_name}
+:docker_latest_tag: {docker_org}/riak-{riak_flavor}:latest
 endif::[]
 ifndef::docker_org[]
 :docker_image_tag: {docker_image_name}
+:docker_latest_tag: riak-{riak_flavor}:latest
 endif::[]
 
 .Tag Image
@@ -295,6 +297,12 @@ endif::[]
 [asciibuild,bash]
 ----
 docker tag {{riak_tag}} {{docker_image_tag}}
+# Push specific version
 docker push {{docker_image_tag}}
+if [[ "{{os_family}}" == "ubuntu" -a "{{os_version}}" == "14.04" ]]; then
+  # Push 'latest' tag if Ubuntu Trusty
+  docker tag {{riak_tag}} {{docker_latest_tag}}
+  docker push {{docker_latest_tag}}
+fi
 ----
 endif::[]
