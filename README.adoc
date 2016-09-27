@@ -267,7 +267,7 @@ ifdef::riak_client[]
 Test that the Python Riak Client can interact with the cluster.
 
 .Pytest Container
-[source,python]
+[source,Dockerfile]
 [asciibuild,Dockerfile,image=riak-docker-tests,run=true,run_opts="--label role=pytests -i -v $(pwd)/test:/usr/src/test -v /var/run/docker.sock:/var/run/docker.sock"]
 ----
 FROM alpine
@@ -277,6 +277,8 @@ WORKDIR /usr/src/test
 CMD /bin/cat
 ----
 
+Run the `py.test` tests found in the link:test/[test/] folder.
+
 .Run Tests
 [source,bash]
 [asciibuild,bash,container="Pytest Container"]
@@ -284,17 +286,15 @@ CMD /bin/cat
 py.test -v
 ----
 
-=== After Test Riak Client
-
 .Cleanup Test Container
 [source,bash]
 [asciibuild,bash]
 ----
 rm -Rf Dockerfile
 for f in __pycache__ .cache *.pyc; do
-  rm -Rf $(find test -name $f -print)
+  rm -Rf $(find test -name $f -print) || true
 done
-docker rm -f $(docker ps -a -q -f label=role=pytests)
+docker rm -f $(docker ps -aqf label=role=pytests)
 ----
 endif::riak_client[]
 
