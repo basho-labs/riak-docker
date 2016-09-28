@@ -3,7 +3,7 @@ Jon Brisbin <jbrisbin@basho.com>
 
 This asciibuild footnote:[https://github.com/jbrisbin/asciibuild] file can be used to build a wide variety of variations of Docker containers for running a Riak cluster. It runs a single node per container instance and by setting the `CLUSTER_COORDINATOR` environment variable to the IP address of a "master" node (the primary or seed node of a cluster), subsequent containers can be automatically joined into a cluster.
 
-image:https://travis-ci.org/jbrisbin/riak-docker.svg[link="https://travis-ci.org/jbrisbin/riak-docker"]
+image:https://travis-ci.org/basho-labs/riak-docker.svg[link="https://travis-ci.org/basho-labs/riak-docker"]
 
 include::vars.adoc[]
 
@@ -289,6 +289,7 @@ To enable automatic bootstrapping, mount the schemas into the container via volu
 SCHEMAS_CONTAINER=$(docker run -d -P --label role=cluster -v $(pwd)/test/schemas:/etc/riak/schemas <% riak_tag %>)
 IP=$(docker inspect -f '{{.NetworkSettings.IPAddress}}' $SCHEMAS_CONTAINER)
 docker exec $SCHEMAS_CONTAINER riak-admin wait-for-service riak_kv
+docker inspect -f '{{.State.Status}}' $SCHEMAS_CONTAINER
 # Only way to ensure bucket types exist is to wait for script to complete.
 # There's no way to know when it's done, so we just do a sleep.
 sleep 5
