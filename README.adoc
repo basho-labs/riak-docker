@@ -261,6 +261,49 @@ STATUS=$(docker exec <% riak_pkg %> riak-admin cluster status --format csv | tai
 [ "$(echo $STATUS)" == "up up up" ]
 ----
 
+== Test Bucket Type Bootstrapping
+
+This Docker image has support for automatically boostrapping bucket types and TS tables. Files in `/etc/riak/schemas/` that end in `.dt` will be read and the name of the file (minus the extension `.dt`) will be used as the bucket name and the contents of the file should contain a single line, which is the bucket type to use.
+
+./etc/riak/schemas/my_bucket.dt
+----
+counter
+----
+
+If the boostrapping script found the above, it would translate that into a `riak-admin bucket-type create`, followed by a `riak-admin bucket-type activate`.
+
+.Datatype Bootstrapping
+[source,bash]
+----
+riak-admin bucket-type create my_bucket '{"props":{"datatype":"counter"}}'
+riak-admin bucket-type activate my_bucket
+----
+
+To enable automatic bootstrapping, mount the schemas into the container via volume, or `COPY` the resources into the `/etc/riak/schemas` directory in a derived container.
+
+.Mount via Volume
+[source,bash]
+[asciibuild,bash]
+----
+# {{=<% %>=}}
+SCHEMAS_CONTAINER=$(docker run -d -P --label role=cluster -v $(pwd)/test/schemas:/etc/riak/schemas <% riak_tag %>)
+IP=$(docker inspect -f '{{.NetworkSettings.IPAddress}}' $SCHEMAS_CONTAINER)
+docker exec $SCHEMAS_CONTAINER riak-admin wait-for-service riak_kv
+# Only way to ensure bucket types exist is to wait for script to complete.
+# There's no way to know when it's done, so we just do a sleep.
+sleep 5
+# Check that the bucket type has been defined
+BUCKET_TYPES=$(docker exec $SCHEMAS_CONTAINER curl -s $IP:8098/admin/explore/clusters/default/bucket_types)
+TYPE=$(echo $BUCKET_TYPES | jq -r '.bucket_types[] | select(.id == "test") | .props.datatype')
+[ "$TYPE" == "counter" ]
+if [ '<% riak_flavor %>' == 'ts' ]; then
+  # Check that the TS tables have been created
+  [ "$(echo $BUCKET_TYPES | jq -r '.bucket_types[] | select(.id == "GeoCheckin") | .props.ddl.local_key[]' | tr -d '\n')" == "idtime" ]
+fi
+# Remove the container
+docker rm -f $SCHEMAS_CONTAINER
+----
+
 ifdef::riak_client[]
 == Test Riak Client
 
