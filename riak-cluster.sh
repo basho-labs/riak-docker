@@ -2,7 +2,7 @@
 #
 # Cluster start script to bootstrap a Riak cluster.
 #
-set -exs
+set -ex
 
 if [[ -x /usr/sbin/riak ]]; then
   export RIAK=/usr/sbin/riak
