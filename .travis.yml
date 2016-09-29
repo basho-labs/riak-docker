@@ -15,10 +15,10 @@ env:
   global:
     - RIAK_TS_VERSION=1.4.0
   matrix:
-    - RIAK_KV_VERSION=2.0.7
-    - RIAK_KV_VERSION=2.1.4
-    - ASCIIBUILD_OPTS="-a os_family=centos -a os_version=7 -a riak_flavor=kv -a riak_version=$RIAK_KV_VERSION"
-    - ASCIIBUILD_OPTS="-a os_family=ubuntu -a os_version=14.04 -a riak_flavor=kv -a riak_version=$RIAK_KV_VERSION"
+    - ASCIIBUILD_OPTS="-a os_family=centos -a os_version=7 -a riak_flavor=kv -a riak_version=2.0.7"
+    - ASCIIBUILD_OPTS="-a os_family=ubuntu -a os_version=14.04 -a riak_flavor=kv -a riak_version=2.0.7"
+    - ASCIIBUILD_OPTS="-a os_family=centos -a os_version=7 -a riak_flavor=kv -a riak_version=2.1.4"
+    - ASCIIBUILD_OPTS="-a os_family=ubuntu -a os_version=14.04 -a riak_flavor=kv -a riak_version=2.1.4"
     - ASCIIBUILD_OPTS="-a os_family=centos -a os_version=7 -a riak_flavor=ts -a riak_version=$RIAK_TS_VERSION"
     - ASCIIBUILD_OPTS="-a os_family=debian -a os_version=8 -a riak_flavor=ts -a riak_version=$RIAK_TS_VERSION"
     - ASCIIBUILD_OPTS="-a os_family=ubuntu -a os_version=14.04 -a riak_flavor=ts -a riak_version=$RIAK_TS_VERSION"
