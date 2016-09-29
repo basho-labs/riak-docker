@@ -248,14 +248,17 @@ This Docker image has support for automatically creating a cluster by setting th
 # {{=<% %>=}}
 # Discover coordinator node IP
 COORDINATOR_NODE=$(docker inspect -f {{.NetworkSettings.IPAddress}} <% riak_pkg %>)
+
 # Start new nodes for the cluster
 for i in 1 2; do
   CONTAINER=$(docker run -d --label=asciibuild.name="Riak in Docker" --label=role=cluster -e COORDINATOR_NODE=$COORDINATOR_NODE <% riak_tag %>)
   # Wait for node to completely start
   docker exec $CONTAINER riak-admin wait-for-service riak_kv
 done
+
 # Wait for cluster to settle some
 sleep 5
+
 # Verify three nodes report up
 STATUS=$(docker exec <% riak_pkg %> riak-admin cluster status --format csv | tail -n 3 | cut -d, -f3)
 [ "$(echo $STATUS)" == "up up up" ]
@@ -286,23 +289,28 @@ To enable automatic bootstrapping, mount the schemas into the container via volu
 [asciibuild,bash]
 ----
 # {{=<% %>=}}
-SCHEMAS_CONTAINER=$(docker run -d -P --label role=cluster -v $(pwd)/test/schemas:/etc/riak/schemas <% riak_tag %>)
-IP=$(docker inspect -f '{{.NetworkSettings.IPAddress}}' $SCHEMAS_CONTAINER)
+SCHEMAS_CONTAINER=$(docker run -d -P --label role=schemas -v $(pwd)/test/schemas:/etc/riak/schemas <% riak_tag %>)
 docker exec $SCHEMAS_CONTAINER riak-admin wait-for-service riak_kv
-docker inspect -f '{{.State.Status}}' $SCHEMAS_CONTAINER
+
+# Discover the IP of the container
+IP=$(docker inspect -f '{{.NetworkSettings.IPAddress}}' $SCHEMAS_CONTAINER)
+
 # Only way to ensure bucket types exist is to wait for script to complete.
 # There's no way to know when it's done, so we just do a sleep.
 sleep 5
+
 # Check that the bucket type has been defined
 BUCKET_TYPES=$(docker exec $SCHEMAS_CONTAINER curl -s $IP:8098/admin/explore/clusters/default/bucket_types)
-TYPE=$(echo $BUCKET_TYPES | jq -r '.bucket_types[] | select(.id == "test") | .props.datatype')
-[ "$TYPE" == "counter" ]
+[[ ! -z "$BUCKET_TYPES" ]]
+
+[ "$(echo $BUCKET_TYPES | jq -r '.bucket_types[] | select(.id == "test") | .props.datatype')" == "counter" ]
 if [ '<% riak_flavor %>' == 'ts' ]; then
   # Check that the TS tables have been created
   [ "$(echo $BUCKET_TYPES | jq -r '.bucket_types[] | select(.id == "GeoCheckin") | .props.ddl.local_key[]' | tr -d '\n')" == "idtime" ]
 fi
+
 # Remove the container
-docker rm -f $SCHEMAS_CONTAINER
+docker rm -f $SCHEMAS_CONTAINER || true
 ----
 
 ifdef::riak_client[]
@@ -354,7 +362,9 @@ ifndef::skip_clean[]
 [asciibuild,bash]
 ----
 rm -Rf Dockerfile
-docker rm -f $(docker ps -aqf label=role=cluster)
+for r in cluster schemas; do
+  docker rm -f $(docker ps -aqf label=role=$r) || true
+done
 ----
 endif::[]
 

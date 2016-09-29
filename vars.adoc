@@ -10,7 +10,7 @@ endif::[]
 :riak_version: 2.1.4
 :riak_tag: riak-{riak_flavor}:{riak_version}
 :riak_explorer:
-:riak_explorer_version: 1.2.2
+:riak_explorer_version: 1.2.3
 :python_version: 2.7
 :python_lib_dir: /usr/lib/python{python_version}/dist-packages
 :riak_client:
