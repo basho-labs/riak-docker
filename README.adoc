@@ -404,9 +404,6 @@ endif::[]
 ifndef::docker_org[]
 :docker_latest_tag: riak-{riak_flavor}:latest
 endif::[]
-endif::[]
-ifndef::latest[]
-endif::[]
 
 .Tag Image
 [source,bash]
@@ -421,4 +418,5 @@ if [[ ! -z "{{docker_latest_tag}}" ]]; then
   docker push {{docker_latest_tag}}
 fi
 ----
+endif::[]
 endif::[]
