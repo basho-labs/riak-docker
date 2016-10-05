@@ -1,6 +1,12 @@
 #!/bin/bash
 
-sed -i -r "s#nodename = (.*)#nodename = riak@$HOST#g" $RIAK_CONF
-sed -i -r "s#distributed_cookie = (.*)#distributed_cookie = $CLUSTER_NAME#g" $RIAK_CONF
-sed -i -r "s#listener\.protobuf\.internal = (.*)#listener.protobuf.internal = $HOST:8087#g" $RIAK_CONF
-sed -i -r "s#listener\.http\.internal = (.*)#listener.http.internal = $HOST:8098#g" $RIAK_CONF
+# Add standard config items
+cat <<END >>$RIAK_CONF
+nodename = riak@$HOST
+distributed_cookie = $CLUSTER_NAME
+listener.protobuf.internal = $HOST:$PB_PORT
+listener.http.internal = $HOST:$HTTP_PORT
+END
+
+# Add user config items
+cat $USER_CONF >>$RIAK_CONF

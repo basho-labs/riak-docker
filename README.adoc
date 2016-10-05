@@ -237,6 +237,23 @@ sleep 1
 [ "3" == "$(stats)" ]
 ----
 
+== Test User Conf
+
+To augment the `riak.conf` file with additional settings, mount a `user.conf` file into the `/etc/riak/` directory. Each line should follow the pattern `setting = value`. Each line will be split on the `=` and made into a regex passed to `sed` that matches the setting key and replaces the value with the value you specify in `user.conf`.
+
+.Patch Configuration File
+[source,bash]
+[asciibuild,bash]
+----
+# {{=<% %>=}}
+CONTAINER=$(docker run --label role=cluster -d -P -v `pwd`/test/user.conf:/etc/riak/user.conf <% riak_tag %>)
+docker exec $CONTAINER riak-admin wait-for-service riak_kv
+
+# Check that the backend was set to leveldb
+BACKEND=$(docker exec $CONTAINER riak config effective | egrep "^storage_backend" | cut -d= -f2 | tr -d ' ')
+[ "$BACKEND" == "leveldb" ]
+----
+
 == Test Cluster
 
 This Docker image has support for automatically creating a cluster by setting the environment variable `COORDINATOR_NODE` to the IP address of a node to which you want to join when the container starts.

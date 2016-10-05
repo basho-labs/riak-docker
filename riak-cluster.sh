@@ -10,6 +10,7 @@ else
   export RIAK=$RIAK_HOME/bin/riak
 fi
 export RIAK_CONF=/etc/riak/riak.conf
+export USER_CONF=/etc/riak/user.conf
 export RIAK_ADVANCED_CONF=/etc/riak/advanced.config
 if [[ -x /usr/sbin/riak-admin ]]; then
   export RIAK_ADMIN=/usr/sbin/riak-admin
@@ -17,6 +18,10 @@ else
   export RIAK_ADMIN=$RIAK_HOME/bin/riak-admin
 fi
 export SCHEMAS_DIR=/etc/riak/schemas/
+
+# Set ports for PB and HTTP
+export PB_PORT=${PB_PORT:-8087}
+export HTTP_PORT=${HTTP_PORT:-8098}
 
 # Use ping to discover our HOSTNAME because it's easier and more reliable than other methods
 export HOST=$(ping -c1 $HOSTNAME | awk '/^PING/ {print $3}' | sed 's/[()]//g')||'127.0.0.1'
