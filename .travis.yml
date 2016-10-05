@@ -6,7 +6,8 @@ services:
 
 before_script:
   - gem install asciibuild
-  - [ "false" == "$TRAVIS_PULL_REQUEST" ] && docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
+  - | 
+    [ "false" == "$TRAVIS_PULL_REQUEST" ] && docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
 
 script:
   - |
