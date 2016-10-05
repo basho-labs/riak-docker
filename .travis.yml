@@ -6,16 +6,10 @@ services:
 
 before_script:
   - gem install asciibuild
-  - | 
-    [ "false" == "$TRAVIS_PULL_REQUEST" ] && docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
+  - if [ "false" == "$TRAVIS_PULL_REQUEST" ]; then docker login -u $DOCKER_USER -p $DOCKER_PASSWORD fi 
 
 script:
-  - |
-    if [ "false" == "$TRAVIS_PULL_REQUEST" ]; then
-      asciibuild $ASCIIBUILD_OPTS -a publish README.adoc
-    else
-      asciibuild $ASCIIBUILD_OPTS README.adoc
-    fi
+  - asciibuild $ASCIIBUILD_OPTS -a skip_publish=$TRAVIS_PULL_REQUEST README.adoc
 
 env:
   global:
