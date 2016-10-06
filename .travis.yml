@@ -1,7 +1,4 @@
 sudo: required
-dist: trusty
-
-language: bash
 
 services:
   - docker
