@@ -209,6 +209,15 @@ To change the variation of image produced, set attributes according to the follo
 | `-a riak_client!` | Turns off Riak Python Client install
 |===
 
+Sometimes on Travis CI our container isn't accessible right away so sleep for a bit just in case since there's no way to determine how long we need to wait.
+
+.Wait for container to start
+[source,bash]
+[asciibuild,bash]
+----
+sleep 3
+----
+
 == Test Single Node
 
 Validate the container is started by waiting for it to fully boot, then access the `/stats` endpoint.
@@ -337,7 +346,7 @@ Test that the Python Riak Client can interact with the cluster.
 
 .Pytest Container
 [source,Dockerfile]
-[asciibuild,Dockerfile,image=riak-docker-tests,run=true,run_opts="--label role=pytests -i -v $(pwd)/test:/usr/src/test -v /var/run/docker.sock:/var/run/docker.sock"]
+[asciibuild,Dockerfile,image=riak-docker-tests,run=true,run_opts="--link {riak_pkg} --label role=pytests -i -v $(pwd)/test:/usr/src/test -v /var/run/docker.sock:/var/run/docker.sock"]
 ----
 FROM alpine
 RUN apk add --no-cache py-pip bash ca-certificates docker
