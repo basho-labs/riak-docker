@@ -359,7 +359,10 @@ py.test -v
 [source,bash]
 [asciibuild,bash]
 ----
-rm -Rf Dockerfile
+# Don't fail the build if cleanup doesn't happen
+set +e
+
+# Remove Python resources
 for f in __pycache__ .cache *.pyc; do
   rm -Rf $(find test -name $f -print) || true
 done
@@ -378,7 +381,12 @@ ifndef::skip_clean[]
 [source,bash]
 [asciibuild,bash]
 ----
+# Don't fail the build if cleanup doesn't happen
+set +e
+
+# Remove the Dockerfile we generate
 rm -Rf Dockerfile
+# Remove the cluster and other containers we started for tests
 for r in cluster schemas; do
   docker rm -f $(docker ps -aqf label=role=$r) || true
 done
@@ -393,17 +401,9 @@ Tag and publish the image.
 :docker_image_name: riak-{riak_flavor}:{os_family}-{riak_version}
 ifdef::docker_org[]
 :docker_image_tag: {docker_org}/{docker_image_name}
-endif::[]
-ifndef::docker_org[]
-:docker_image_tag: {docker_image_name}
-endif::[]
-
-ifdef::latest[]
-ifdef::docker_org[]
-:docker_latest_tag: {docker_org}/riak-{riak_flavor}:latest
 endif::docker_org[]
 ifndef::docker_org[]
-:docker_latest_tag: riak-{riak_flavor}:latest
+:docker_image_tag: {docker_image_name}
 endif::docker_org[]
 
 .Tag Image
@@ -413,11 +413,23 @@ endif::docker_org[]
 docker tag {{riak_tag}} {{docker_image_tag}}
 # Push specific version
 docker push {{docker_image_tag}}
-if [[ ! -z "{{docker_latest_tag}}" ]]; then
-  # Push 'latest' tag
-  docker tag {{riak_tag}} {{docker_latest_tag}}
-  docker push {{docker_latest_tag}}
-fi
+----
+
+ifdef::latest[]
+ifdef::docker_org[]
+:docker_latest_tag: {docker_org}/riak-{riak_flavor}:latest
+endif::docker_org[]
+ifndef::docker_org[]
+:docker_latest_tag: riak-{riak_flavor}:latest
+endif::docker_org[]
+
+.Tag Latest Image
+[source,bash]
+[asciibuild,bash]
+----
+# Push 'latest' tag
+docker tag {{riak_tag}} {{docker_latest_tag}}
+docker push {{docker_latest_tag}}
 ----
 endif::latest[]
 endif::publish[]
