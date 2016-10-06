@@ -27,6 +27,9 @@ ifeval::["{os_family}" == "ubuntu"]
 ifeval::["{os_version}" == "14.04"]
 :trusty:
 :latest:
+ifeval::["{travis}" == "true"]
+:publish:
+endif::[]
 :os_flavor: trusty
 endif::[]
 endif::[]
