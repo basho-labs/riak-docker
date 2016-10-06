@@ -31,6 +31,7 @@ deploy:
   provider: s3
   access_key_id: $ACCESS_KEY
   secret_access_key: $SECRET_KEY
-  bucket: "$TRAVIS_REPO_SLUG/$TRAVIS_BRANCH"
+  bucket: basho-ci-logs
   local_dir: abuild
+  upload-dir: $TRAVIS_REPO_SLUG/$TRAVIS_BRANCH
   skip_cleanup: true

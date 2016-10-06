@@ -70,4 +70,5 @@ endif::[]
 :docker_org: basho
 ifeval::["{skip_publish}" == "true"]
 :publish!:
+:latest!:
 endif::[]
