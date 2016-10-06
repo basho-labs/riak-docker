@@ -66,7 +66,6 @@ ifeval::["{pkg_format}" == "tgz"]
 :riak_tgz_baseurl: https://basholabs.artifactoryonline.com/basholabs/build
 endif::[]
 :docker_org: basho
-:publish:
 ifeval::["{skip_publish}" == "true"]
 :publish!:
 endif::[]

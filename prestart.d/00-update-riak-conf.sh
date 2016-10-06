@@ -8,5 +8,7 @@ listener.protobuf.internal = $HOST:$PB_PORT
 listener.http.internal = $HOST:$HTTP_PORT
 END
 
-# Add user config items
-cat $USER_CONF >>$RIAK_CONF
+# Maybe add user config items
+if [ -s $USER_CONF ]; then
+  cat $USER_CONF >>$RIAK_CONF
+fi
