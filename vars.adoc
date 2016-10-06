@@ -26,6 +26,7 @@ ifeval::["{os_family}" == "ubuntu"]
 :pkg_format: deb
 ifeval::["{os_version}" == "14.04"]
 :trusty:
+:latest:
 :os_flavor: trusty
 endif::[]
 endif::[]
@@ -66,7 +67,6 @@ ifeval::["{pkg_format}" == "tgz"]
 endif::[]
 :docker_org: basho
 :publish:
-:latest:
 ifeval::["{skip_publish}" == "true"]
 :publish!:
 endif::[]
