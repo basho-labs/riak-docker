@@ -26,7 +26,6 @@ ifeval::["{os_family}" == "ubuntu"]
 :pkg_format: deb
 ifeval::["{os_version}" == "14.04"]
 :trusty:
-:latest:
 ifeval::["{travis}" == "true"]
 :publish:
 endif::[]
