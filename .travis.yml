@@ -31,3 +31,4 @@ deploy:
   secret_access_key: $SECRET_KEY
   bucket: "$TRAVIS_REPO_SLUG/$TRAVIS_BRANCH"
   local_dir: abuild
+  skip_cleanup: true
