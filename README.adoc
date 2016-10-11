@@ -116,6 +116,7 @@ endif::[]
 ifdef::riak_explorer[]
 # Install Riak Explorer
 RUN curl -sSL https://github.com/basho-labs/riak_explorer/releases/download/{{riak_explorer_version}}/riak_explorer-{{riak_explorer_version}}.patch-{{os_family}}-{{os_version}}.tar.gz | tar -zxf - -C $RIAK_HOME --strip-components 2
+RUN for f in riak_pb riak_kv riak_ts riak_dt riak_search riak_yokozuna;do rm -f $RIAK_HOME/lib/basho-patches/$f*; done
 endif::riak_explorer[]
 
 ifdef::riak_client[]
@@ -393,11 +394,13 @@ done
 ----
 endif::[]
 
-ifdef::publish[]
 == Publish
 
-Tag and publish the image.
+Tag and publish the image if the attribute `publish` is set when running the build.
 
+* `publish`: {publish}
+
+ifdef::publish[]
 :docker_image_name: riak-{riak_flavor}:{os_family}-{riak_version}
 ifdef::docker_org[]
 :docker_image_tag: {docker_org}/{docker_image_name}
