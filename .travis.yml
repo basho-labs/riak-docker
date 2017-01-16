@@ -5,7 +5,7 @@ services:
 
 before_script:
   - gem install asciibuild
-  - '[ "false" == "$TRAVIS_PULL_REQUEST" ] && docker login -u $DOCKER_USER -p $DOCKER_PASSWORD' 
+  - '[ "false" == "$TRAVIS_PULL_REQUEST" ] && docker login -u $DOCKER_USER -p $DOCKER_PASSWORD'
 
 script:
   - travis_retry asciibuild $ASCIIBUILD_OPTS -a travis=$TRAVIS -a skip_publish=$TRAVIS_PULL_REQUEST README.adoc
@@ -15,12 +15,15 @@ env:
     - RIAK_TS_VERSION=1.5.0
     - RIAK_20_VERSION=2.0.7
     - RIAK_21_VERSION=2.1.4
+    - RIAK_22_VERSION=2.2.0
   matrix:
     - ASCIIBUILD_OPTS="-a os_family=centos -a os_version=7 -a riak_flavor=kv -a riak_version=$RIAK_20_VERSION"
     - ASCIIBUILD_OPTS="-a os_family=centos -a os_version=7 -a riak_flavor=kv -a riak_version=$RIAK_21_VERSION"
+    - ASCIIBUILD_OPTS="-a os_family=centos -a os_version=7 -a riak_flavor=kv -a riak_version=$RIAK_22_VERSION"
     - ASCIIBUILD_OPTS="-a os_family=centos -a os_version=7 -a riak_flavor=ts -a riak_version=$RIAK_TS_VERSION"
     - ASCIIBUILD_OPTS="-a os_family=ubuntu -a os_version=14.04 -a riak_flavor=kv -a riak_version=$RIAK_20_VERSION"
-    - ASCIIBUILD_OPTS="-a os_family=ubuntu -a os_version=14.04 -a riak_flavor=kv -a riak_version=$RIAK_21_VERSION -a latest"
+    - ASCIIBUILD_OPTS="-a os_family=ubuntu -a os_version=14.04 -a riak_flavor=kv -a riak_version=$RIAK_21_VERSION"
+    - ASCIIBUILD_OPTS="-a os_family=ubuntu -a os_version=14.04 -a riak_flavor=kv -a riak_version=$RIAK_22_VERSION -a latest"
     - ASCIIBUILD_OPTS="-a os_family=ubuntu -a os_version=14.04 -a riak_flavor=ts -a riak_version=$RIAK_TS_VERSION -a latest"
     - ASCIIBUILD_OPTS="-a os_family=debian -a os_version=8 -a riak_flavor=ts -a riak_version=$RIAK_TS_VERSION"
 

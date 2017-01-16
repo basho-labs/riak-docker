@@ -121,12 +121,15 @@ endif::riak_explorer[]
 
 ifdef::riak_client[]
 # Install the Python client
-RUN \
-  cd {{python_lib_dir}} && \
-  curl -sSLO https://pypi.python.org/packages/{{python_version}}/r/riak/riak-{{riak_client_version}}-py{{python_version}}.egg && \
-  curl -sSLO https://pypi.python.org/packages/{{python_version}}/p/protobuf/protobuf-{{protobuf_version}}-py{{python_version}}.egg && \
-  unzip -o riak-{{riak_client_version}}-py{{python_version}}.egg && \
-  unzip -o protobuf-{{protobuf_version}}-py{{python_version}}.egg
+ifdef::ubuntu,debian[]
+RUN apt-get install -y build-essential libssl-dev
+RUN apt-get install -y python-pip
+endif::[]
+ifdef::centos[]
+RUN yum groups install -y 'Development Tools'
+RUN yum install -y openssl-devel python-pip
+endif::[]
+RUN pip install --upgrade pip riak
 endif::riak_client[]
 
 # Expose default ports
@@ -282,6 +285,7 @@ STATUS=$(docker exec <% riak_pkg %> riak-admin cluster status --format csv | tai
 [ "$(echo $STATUS)" == "up up up" ]
 ----
 
+ifdef::riak_explorer[]
 == Test Bucket Type Bootstrapping
 
 This Docker image has support for automatically boostrapping bucket types and TS tables. Files in `/etc/riak/schemas/` that end in `.dt` will be read and the name of the file (minus the extension `.dt`) will be used as the bucket name and the contents of the file should contain a single line, which is the bucket type to use.
@@ -330,6 +334,7 @@ fi
 # Remove the container
 docker rm -f $SCHEMAS_CONTAINER || true
 ----
+endif::riak_explorer[]
 
 ifdef::riak_client[]
 == Test Riak Client
