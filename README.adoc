@@ -341,7 +341,7 @@ Test that the Python Riak Client can interact with the cluster.
 [asciibuild,Dockerfile,image=riak-docker-tests,run=true,run_opts="--link {riak_pkg} --label role=pytests -i -v $(pwd)/test:/usr/src/test -v /var/run/docker.sock:/var/run/docker.sock"]
 ----
 FROM alpine
-RUN apk add --no-cache py-pip bash ca-certificates docker
+RUN apk add --no-cache py2-pip bash ca-certificates docker
 RUN pip install --upgrade pip pytest riak
 WORKDIR /usr/src/test
 CMD /bin/cat
