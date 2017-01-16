@@ -123,13 +123,13 @@ ifdef::riak_client[]
 # Install the Python client
 ifdef::ubuntu,debian[]
 RUN apt-get install -y build-essential libssl-dev
-RUN apt-get install -y python-pip
+RUN apt-get install -y python-pip python-dev
 endif::[]
 ifdef::centos[]
 RUN yum groups install -y 'Development Tools'
-RUN yum install -y openssl-devel python-pip
+RUN yum install -y openssl-devel python-devel python-pip
 endif::[]
-RUN pip install --upgrade pip riak
+RUN pip install --upgrade pip cryptography riak
 endif::riak_client[]
 
 # Expose default ports
