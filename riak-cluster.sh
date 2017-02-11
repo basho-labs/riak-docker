@@ -34,7 +34,7 @@ export COORDINATOR_NODE=${COORDINATOR_NODE:-$HOSTNAME}
 export COORDINATOR_NODE_HOST=$(ping -c1 $COORDINATOR_NODE | awk '/^PING/ {print $3}' | sed 's/[()]//g')||'127.0.0.1'
 
 # Run all prestart scripts
-PRESTART=$(find /etc/riak/prestart.d -name *.sh -print)
+PRESTART=$(find /etc/riak/prestart.d -name *.sh -print | sort)
 for s in $PRESTART; do
   . $s
 done
@@ -44,7 +44,7 @@ $RIAK start
 $RIAK_ADMIN wait-for-service riak_kv
 
 # Run all poststart scripts
-POSTSTART=$(find /etc/riak/poststart.d -name *.sh -print)
+POSTSTART=$(find /etc/riak/poststart.d -name *.sh -print | sort)
 for s in $POSTSTART; do
   . $s
 done
