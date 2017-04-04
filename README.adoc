@@ -151,7 +151,7 @@ RUN mkdir -p /etc/riak/schemas
 
 WORKDIR /var/lib/riak
 
-CMD $RIAK_HOME/riak-cluster.sh
+CMD ["$RIAK_HOME/riak-cluster.sh"]
 
 # Clean up APT cache
 RUN rm -rf /var/lib/apt/lists/* /tmp/*
