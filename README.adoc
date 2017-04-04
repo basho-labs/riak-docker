@@ -59,7 +59,7 @@ ifdef::debian+jessie[]
 RUN echo "deb http://http.debian.net/debian jessie-backports main" >/etc/apt/sources.list.d/openjdk.list
 endif::debian+jessie[]
 RUN apt-get update
-RUN apt-get install -y openjdk-8-jdk-headless
+RUN apt-get install -y openjdk-8-jre-headless openjdk-8-jdk-headless
 endif::openjdk[]
 endif::ubuntu,debian[]
 
