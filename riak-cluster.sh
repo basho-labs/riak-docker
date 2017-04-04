@@ -46,7 +46,7 @@ $RIAK_ADMIN wait-for-service riak_kv
 # Run all poststart scripts
 POSTSTART=$(find /etc/riak/poststart.d -name *.sh -print | sort)
 for s in $POSTSTART; do
-  . $
+  . $s
 done
 
 # Trap SIGTERM and SIGINT and tail the log file indefinitely

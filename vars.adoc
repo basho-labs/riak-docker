@@ -1,3 +1,4 @@
+:riak_home: /usr/lib/riak
 :riak_flavor: kv
 ifeval::["{riak_flavor}" == "kv"]
 :!riak_ts:
@@ -50,6 +51,7 @@ ifeval::["{os_family}" == "centos"]
 :!osx:
 :pkg_format: rpm
 :python_lib_dir: /usr/lib/python{python_version}/site-packages
+:riak_home: /usr/lib64/riak
 endif::[]
 ifeval::["{os_family}" == "osx"]
 :!ubuntu:

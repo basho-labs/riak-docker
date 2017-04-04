@@ -83,17 +83,12 @@ endif::[]
 endif::docker[]
 
 ENV RIAK_VERSION {{riak_version}}
+ENV RIAK_HOME {{riak_home}}
 ifndef::riak_ts[]
 ENV RIAK_FLAVOR KV
 endif::[]
 ifdef::riak_ts[]
 ENV RIAK_FLAVOR TS
-endif::[]
-ifdef::ubuntu,debian[]
-ENV RIAK_HOME /usr/lib/riak
-endif::[]
-ifdef::centos[]
-ENV RIAK_HOME /usr/lib64/riak
 endif::[]
 ifeval::["{pkg_format}" == "tgz"]
 RUN \
@@ -128,7 +123,7 @@ ifdef::centos[]
 RUN yum groups install -y 'Development Tools'
 RUN yum install -y openssl-devel python-devel libffi-devel python-pip
 endif::[]
-RUN pip install --upgrade pip cryptography riak
+RUN pip install --upgrade pip cryptography pyparsing appdirs riak
 endif::riak_client[]
 
 # Expose default ports
@@ -151,7 +146,7 @@ RUN mkdir -p /etc/riak/schemas
 
 WORKDIR /var/lib/riak
 
-CMD ["$RIAK_HOME/riak-cluster.sh"]
+CMD ["{{riak_home}}/riak-cluster.sh"]
 
 # Clean up APT cache
 RUN rm -rf /var/lib/apt/lists/* /tmp/*
