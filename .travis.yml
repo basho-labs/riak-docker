@@ -12,10 +12,10 @@ script:
 
 env:
   global:
-    - RIAK_TS_VERSION=1.5.0
+    - RIAK_TS_VERSION=1.5.2
     - RIAK_20_VERSION=2.0.7
     - RIAK_21_VERSION=2.1.4
-    - RIAK_22_VERSION=2.2.0
+    - RIAK_22_VERSION=2.2.3
   matrix:
     - ASCIIBUILD_OPTS="-a os_family=centos -a os_version=7 -a riak_flavor=kv -a riak_version=$RIAK_20_VERSION"
     - ASCIIBUILD_OPTS="-a os_family=centos -a os_version=7 -a riak_flavor=kv -a riak_version=$RIAK_21_VERSION"
