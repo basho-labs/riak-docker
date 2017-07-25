@@ -10,7 +10,7 @@ else
   export RIAK=$RIAK_HOME/bin/riak
 fi
 export RIAK_CONF=/etc/riak/riak.conf
-export USER_CONF=/etc/riak/user.conf
+export USER_CONF=${USER_CONF:-/etc/riak/user.conf}
 export RIAK_ADVANCED_CONF=/etc/riak/advanced.config
 if [[ -x /usr/sbin/riak-admin ]]; then
   export RIAK_ADMIN=/usr/sbin/riak-admin
