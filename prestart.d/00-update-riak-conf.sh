@@ -6,6 +6,7 @@ nodename = riak@$HOST
 distributed_cookie = $CLUSTER_NAME
 listener.protobuf.internal = $HOST:$PB_PORT
 listener.http.internal = $HOST:$HTTP_PORT
+storage_backend = ${STORAGE_BACKEND:-bitcask}
 END
 
 # Maybe add user config items
